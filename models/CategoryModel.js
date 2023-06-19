@@ -5,7 +5,7 @@ import Product from "./ProductModel.js";
 const { DataTypes } = Sequelize;
 
 const Category = db.define(
-  "Category",
+  "category",
   {
     category_id: {
       type: DataTypes.INTEGER,
