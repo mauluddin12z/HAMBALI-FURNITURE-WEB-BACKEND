@@ -22,4 +22,14 @@ app.use(ProductRoute);
 app.use(CategoryRoute);
 app.use(express.static("public"));
 
+app.use(
+  "/uploads/productImg",
+  express.static(path.join(__dirname, "public/upload/productImg"))
+);
+
+app.use(
+  "/uploads/categoryImg",
+  express.static(path.join(__dirname, "public/upload/categoryImg"))
+);
+
 app.listen(5000, () => console.log("Server Up and Running..."));
