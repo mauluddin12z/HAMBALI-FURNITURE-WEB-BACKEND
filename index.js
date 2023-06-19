@@ -6,7 +6,15 @@ import CategoryRoute from "./routes/CategoryRoute.js";
 
 const app = express();
 
-app.use(cors());
+app.use(
+    cors({
+      credentials: true,
+      origin: [
+        "http://localhost:3000",
+        "https://hambali-furniture-web-frontend.vercel.app/",
+      ],
+    })
+  );
 app.use(express.json());
 app.use(FileUpload());
 app.use(ProductRoute);
