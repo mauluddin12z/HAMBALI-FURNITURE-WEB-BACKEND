@@ -22,15 +22,15 @@ app.use(FileUpload());
 app.use(ProductRoute);
 app.use(CategoryRoute);
 app.use(express.static("public"));
-
-app.use(
-  "/uploads/productImg",
-  express.static(path.join(__dirname, "public/upload/productImg"))
-);
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 app.use(
   "/uploads/categoryImg",
-  express.static(path.join(__dirname, "public/upload/categoryImg"))
+  express.static(path.join(__dirname, "/public/uploads/categoryImg"))
+);
+app.use(
+  "/uploads/productsImg",
+  express.static(path.join(__dirname, "public/uploads/productsImg"))
 );
 
 app.listen(5000, () => console.log("Server Up and Running..."));
