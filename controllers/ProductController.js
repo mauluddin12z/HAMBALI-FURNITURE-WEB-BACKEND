@@ -11,9 +11,43 @@ export const getProducts = async (req, res) => {
       include: [{ model: Category, attributes: ["category"] }],
       order: [["product_name", "ASC"]],
     });
+
     res.json(response);
   } catch (error) {
     console.log(error.message);
+  }
+};
+
+export const getFilteredProducts = async (req, res) => {
+  let { start, limit, categoryQuery, searchQuery } = req.query;
+  start = start ? parseInt(start) : null;
+  limit = limit ? parseInt(limit) : null;
+  categoryQuery = categoryQuery ? parseInt(categoryQuery) : null;
+  const whereCondition = categoryQuery ? { category_id: categoryQuery } : {};
+  const searchValue = searchQuery
+    ? {
+        product_name: {
+          [Op.like]: `%${searchQuery}%`,
+        },
+      }
+    : {};
+
+  try {
+    const response = await Product.findAll({
+      include: [{ model: Category, attributes: ["category"] }],
+      order: [["product_name", "ASC"]],
+      offset: start,
+      limit: limit,
+      where: {
+        ...whereCondition,
+        ...searchValue,
+      },
+    });
+
+    res.json(response);
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ message: "Error fetching products" });
   }
 };
 
@@ -22,6 +56,22 @@ export const getProductById = async (req, res) => {
     const response = await Product.findOne({
       where: {
         product_id: req.params.id,
+      },
+      include: [{ model: Category, attributes: ["category"] }],
+      order: [["product_name", "ASC"]],
+    });
+    res.json(response);
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+export const getProductByName = async (req, res) => {
+  let { productNameQuery } = req.query;
+  try {
+    const response = await Product.findOne({
+      where: {
+        product_name: productNameQuery,
       },
       include: [{ model: Category, attributes: ["category"] }],
       order: [["product_name", "ASC"]],

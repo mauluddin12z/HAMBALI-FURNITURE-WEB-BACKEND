@@ -2,7 +2,9 @@ import express from "express";
 import {
   createProduct,
   deleteProduct,
+  getFilteredProducts,
   getProductById,
+  getProductByName,
   getProducts,
   updateProduct,
 } from "../controllers/ProductController.js";
@@ -10,6 +12,8 @@ import {
 const router = express.Router();
 
 router.get("/products", getProducts);
+router.get("/productByName", getProductByName);
+router.get("/filteredProducts", getFilteredProducts);
 router.get("/products/:id", getProductById);
 router.post("/products", createProduct);
 router.patch("/products/:id", updateProduct);
