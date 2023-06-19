@@ -3,6 +3,7 @@ import FileUpload from "express-fileupload";
 import cors from "cors";
 import ProductRoute from "./routes/ProductRoute.js";
 import CategoryRoute from "./routes/CategoryRoute.js";
+import path from "path";
 
 const app = express();
 
