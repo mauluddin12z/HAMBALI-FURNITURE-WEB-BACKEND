@@ -10,10 +10,7 @@ const app = express();
 app.use(
   cors({
     credentials: true,
-    origin: [
-      "http://localhost:3000",
-      "https://hambali-furniture-web-frontend.vercel.app",
-    ],
+    origin: "https://hambali-furniture-web-frontend.vercel.app",
   })
 );
 
