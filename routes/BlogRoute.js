@@ -2,7 +2,7 @@ import express from "express";
 import {
   createBlog,
   getBlogById,
-  getBlogByName,
+  getBlogByTitle,
   getBlogs,
   getFilteredBlogs,
   updateBlog,
@@ -11,7 +11,7 @@ import {
 const router = express.Router();
 
 router.get("/blogs", getBlogs);
-router.get("/blogByName", getBlogByName);
+router.get("/blogByTitle", getBlogByTitle);
 router.get("/filteredBlogs", getFilteredBlogs);
 router.get("/blog/:id", getBlogById);
 router.post("/blog", createBlog);

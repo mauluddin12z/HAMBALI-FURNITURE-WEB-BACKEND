@@ -42,7 +42,7 @@ export const getFilteredBlogs = async (req, res) => {
   }
 };
 
-export const getBlogByName = async (req, res) => {
+export const getBlogByTitle = async (req, res) => {
   let { blogTitleQuery } = req.query;
   try {
     const response = await Blog.findOne({
