@@ -10,7 +10,10 @@ const app = express();
 app.use(
   cors({
     credentials: true,
-    origin: "https://hambali-furniture-web-frontend.vercel.app",
+    origin: [
+      "http://localhost:3000",
+      "https://hambali-furniture-web-frontend.vercel.app",
+    ],
   })
 );
 
@@ -27,7 +30,7 @@ app.use(
 );
 app.use(
   "/uploads/productsImg",
-  express.static(path.join(__dirname, "public/uploads/productsImg"))
+  express.static(path.join(__dirname, "/public/uploads/productsImg"))
 );
 
 app.listen(5000, () => console.log("Server Up and Running..."));
