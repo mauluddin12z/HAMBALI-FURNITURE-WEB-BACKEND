@@ -96,13 +96,18 @@ export const createProduct = async (req, res) => {
     category_id,
   } = req.body;
 
+  const existingProduct = await Product.findOne({ where: { product_name } });
+  if (existingProduct) {
+    return res.status(422).json({ msg: "Product name already exists" });
+  }
+
   if (req.files !== null) {
     const image = req.files.image;
     const fileSize = image.data.length;
     const maxFileSize = 50 * 1024 * 1024;
     const ext = path.extname(image.name);
     fileName = datetimenow() + image.md5 + ext;
-    const allowedType = [".png", ".jpg", ".jpeg", ".pdf"];
+    const allowedType = [".png", ".jpg", ".jpeg", ".jfif"];
 
     if (!allowedType.includes(ext.toLowerCase()))
       return res.status(422).json({ msg: "Invalid File" });
@@ -115,7 +120,7 @@ export const createProduct = async (req, res) => {
       }
       try {
         await Product.create({
-          product_name,
+          product_name: product_name?.replace(/[^a-zA-Z0-9 ]/g, "") || "",
           image: fileName,
           imageUrl: `/uploads/productsImg/${fileName}`,
           description,
@@ -151,6 +156,17 @@ export const updateProduct = async (req, res) => {
     category_id,
   } = req.body;
 
+  const existingProduct = await Product.findOne({
+    where: {
+      product_name: product_name?.replace(/[^a-zA-Z0-9 ]/g, "") || getProductById.product_name,
+      product_id: {
+        [Op.ne]: req.params.id,
+      },
+    },
+  });
+  if (existingProduct) {
+    return res.status(422).json({ msg: "Product name already exists" });
+  }
   let fileName = "";
 
   if (req.files == null) {
@@ -158,7 +174,7 @@ export const updateProduct = async (req, res) => {
     try {
       await Product.update(
         {
-          product_name,
+          product_name: product_name?.replace(/[^a-zA-Z0-9 ]/g, "") || getProductById.product_name,
           description,
           price,
           dimensions,
@@ -184,7 +200,7 @@ export const updateProduct = async (req, res) => {
     const maxFileSize = 50 * 1024 * 1024;
     const ext = path.extname(image.name);
     fileName = datetimenow() + image.md5 + ext;
-    const allowedType = [".png", ".jpg", ".jpeg", ".pdf"];
+    const allowedType = [".png", ".jpg", ".jpeg", ".jfif"];
 
     if (!allowedType.includes(ext.toLowerCase()))
       return res.status(422).json({ msg: "Invalid Images" });
@@ -200,7 +216,7 @@ export const updateProduct = async (req, res) => {
       try {
         await Product.update(
           {
-            product_name,
+            product_name: product_name?.replace(/[^a-zA-Z0-9 ]/g, "") || "",
             description,
             price,
             dimensions,

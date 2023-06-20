@@ -3,6 +3,7 @@ import FileUpload from "express-fileupload";
 import cors from "cors";
 import ProductRoute from "./routes/ProductRoute.js";
 import CategoryRoute from "./routes/CategoryRoute.js";
+import BlogRoute from "./routes/BlogRoute.js";
 import path from "path";
 
 const app = express();
@@ -21,6 +22,7 @@ app.use(express.json());
 app.use(FileUpload());
 app.use(ProductRoute);
 app.use(CategoryRoute);
+app.use(BlogRoute);
 app.use(express.static("public"));
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
@@ -31,6 +33,10 @@ app.use(
 app.use(
   "/uploads/productsImg",
   express.static(path.join(__dirname, "/public/uploads/productsImg"))
+);
+app.use(
+  "/uploads/blogImg",
+  express.static(path.join(__dirname, "/public/uploads/blogImg"))
 );
 
 app.listen(5000, () => console.log("Server Up and Running..."));
