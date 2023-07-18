@@ -26,9 +26,18 @@ export const getFilteredProducts = async (req, res) => {
   const whereCondition = categoryQuery ? { category_id: categoryQuery } : {};
   const searchValue = searchQuery
     ? {
-        product_name: {
-          [Op.like]: `%${searchQuery}%`,
-        },
+        [Op.or]: [
+          {
+            product_name: {
+              [Op.like]: `%${searchQuery}%`,
+            },
+          },
+          {
+            "$category.category$": {
+              [Op.like]: `%${searchQuery}%`,
+            },
+          },
+        ],
       }
     : {};
 
@@ -40,6 +49,46 @@ export const getFilteredProducts = async (req, res) => {
       limit: limit,
       where: {
         ...whereCondition,
+        ...searchValue,
+      },
+    });
+
+    res.json(response);
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ message: "Error fetching products" });
+  }
+};
+
+export const getProductSearchResults = async (req, res) => {
+  let { start, limit, categoryQuery, searchQuery } = req.query;
+  start = start ? parseInt(start) : null;
+  limit = limit ? parseInt(limit) : null;
+  categoryQuery = categoryQuery ? parseInt(categoryQuery) : null;
+  const searchValue = searchQuery
+    ? {
+        [Op.or]: [
+          {
+            product_name: {
+              [Op.like]: `%${searchQuery}%`,
+            },
+          },
+          {
+            "$category.category$": {
+              [Op.like]: `%${searchQuery}%`,
+            },
+          },
+        ],
+      }
+    : {};
+
+  try {
+    const response = await Product.findAll({
+      include: [{ model: Category, attributes: ["category"] }],
+      order: [["product_name", "ASC"]],
+      offset: start,
+      limit: limit,
+      where: {
         ...searchValue,
       },
     });
@@ -158,7 +207,9 @@ export const updateProduct = async (req, res) => {
 
   const existingProduct = await Product.findOne({
     where: {
-      product_name: product_name?.replace(/[^a-zA-Z0-9 ]/g, "") || getProductById.product_name,
+      product_name:
+        product_name?.replace(/[^a-zA-Z0-9 ]/g, "") ||
+        getProductById.product_name,
       product_id: {
         [Op.ne]: req.params.id,
       },
@@ -174,7 +225,9 @@ export const updateProduct = async (req, res) => {
     try {
       await Product.update(
         {
-          product_name: product_name?.replace(/[^a-zA-Z0-9 ]/g, "") || getProductById.product_name,
+          product_name:
+            product_name?.replace(/[^a-zA-Z0-9 ]/g, "") ||
+            getProductById.product_name,
           description,
           price,
           dimensions,

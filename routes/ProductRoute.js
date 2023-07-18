@@ -5,6 +5,7 @@ import {
   getFilteredProducts,
   getProductById,
   getProductByName,
+  getProductSearchResults,
   getProducts,
   updateProduct,
 } from "../controllers/ProductController.js";
@@ -13,6 +14,7 @@ const router = express.Router();
 
 router.get("/products", getProducts);
 router.get("/productByName", getProductByName);
+router.get("/productSearchResults", getProductSearchResults);
 router.get("/filteredProducts", getFilteredProducts);
 router.get("/products/:id", getProductById);
 router.post("/products", createProduct);
