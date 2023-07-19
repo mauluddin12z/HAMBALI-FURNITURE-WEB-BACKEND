@@ -1,3 +1,4 @@
 .vercel
 .env
 config/LocalDatabase.js
+config/DevDatabase.js

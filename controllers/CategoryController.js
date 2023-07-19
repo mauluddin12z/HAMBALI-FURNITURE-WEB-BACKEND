@@ -23,6 +23,20 @@ export const getCategoryById = async (req, res) => {
   }
 };
 
+export const getCategoryByName = async (req, res) => {
+  let { categoryQuery } = req.query;
+  try {
+    const response = await Category.findOne({
+      where: {
+        category: categoryQuery,
+      },
+    });
+    res.json(response);
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
 const pathToCategoryImage = "./public/uploads/categoryImg/";
 export const createCategory = async (req, res) => {
   let fileName = "";
