@@ -5,8 +5,15 @@ import datetimenow from "../utils/datetimeFormatter.js";
 import { Op } from "sequelize";
 
 export const getCategories = async (req, res) => {
+  let { start, limit } = req.query;
+  start = start ? parseInt(start) : null;
+  limit = limit ? parseInt(limit) : null;
   try {
-    const response = await Category.findAll();
+    const response = await Category.findAll({
+      order: [["category", "ASC"]],
+      offset: start,
+      limit: limit,
+    });
     res.json(response);
   } catch (error) {
     console.log(error.message);
