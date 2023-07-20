@@ -3,7 +3,7 @@ import Product from "../models/ProductModel.js";
 import path from "path";
 import fs from "fs";
 import datetimenow from "../utils/datetimeFormatter.js";
-import { Op } from "sequelize";
+import { Op, Sequelize } from "sequelize";
 
 export const getProducts = async (req, res) => {
   try {
@@ -91,6 +91,31 @@ export const getProductSearchResults = async (req, res) => {
       where: {
         ...searchValue,
       },
+    });
+
+    res.json(response);
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ message: "Error fetching products" });
+  }
+};
+
+export const getRelatedProducts = async (req, res) => {
+  let { categoryQuery, productNameQuery } = req.query;
+  categoryQuery = categoryQuery ? parseInt(categoryQuery) : null;
+  const whereCondition = categoryQuery ? { category_id: categoryQuery } : {};
+
+  if (productNameQuery) {
+    whereCondition.product_name = {
+      [Op.notLike]: `%${productNameQuery}%`,
+    };
+  }
+
+  try {
+    const response = await Product.findAll({
+      include: [{ model: Category, attributes: ["category"] }],
+      order: Sequelize.literal("RAND()"),
+      where: whereCondition,
     });
 
     res.json(response);
