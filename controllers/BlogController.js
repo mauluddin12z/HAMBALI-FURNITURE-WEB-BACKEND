@@ -42,6 +42,25 @@ export const getFilteredBlogs = async (req, res) => {
   }
 };
 
+export const getOtherBlogs = async (req, res) => {
+  let { blogIdQuery } = req.query;
+  try {
+    const response = await Blog.findAll({
+      order: [["createdAt", "DESC"]],
+      where: {
+        blog_id: {
+          [Op.notLike]: `%${blogIdQuery}%`,
+        },
+      },
+    });
+
+    res.json(response);
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ message: "Error fetching products" });
+  }
+};
+
 export const getBlogByTitle = async (req, res) => {
   let { blogTitleQuery } = req.query;
   try {
