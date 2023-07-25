@@ -107,7 +107,7 @@ export const getRelatedProducts = async (req, res) => {
 
   if (productNameQuery) {
     whereCondition.product_name = {
-      [Op.notLike]: `%${productNameQuery}%`,
+      [Op.not]: productNameQuery,
     };
   }
 

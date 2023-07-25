@@ -49,7 +49,7 @@ export const getOtherBlogs = async (req, res) => {
       order: [["createdAt", "DESC"]],
       where: {
         blog_id: {
-          [Op.notLike]: `%${blogIdQuery}%`,
+          [Op.not]: blogIdQuery,
         },
       },
     });

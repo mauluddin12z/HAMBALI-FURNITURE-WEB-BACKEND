@@ -4,7 +4,10 @@ import cors from "cors";
 import ProductRoute from "./routes/ProductRoute.js";
 import CategoryRoute from "./routes/CategoryRoute.js";
 import BlogRoute from "./routes/BlogRoute.js";
+import UserRoute from "./routes/UserRoute.js";
 import path from "path";
+import dotenv from "dotenv";
+dotenv.config();
 
 const app = express();
 
@@ -23,6 +26,7 @@ app.use(FileUpload());
 app.use(ProductRoute);
 app.use(CategoryRoute);
 app.use(BlogRoute);
+app.use(UserRoute);
 app.use(express.static("public"));
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
