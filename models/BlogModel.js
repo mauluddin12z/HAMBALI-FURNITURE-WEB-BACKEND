@@ -1,5 +1,6 @@
 import { Sequelize } from "sequelize";
 import db from "../config/Database.js";
+import BlogImage from "./BlogImageModel.js";
 
 const { DataTypes } = Sequelize;
 
@@ -12,14 +13,16 @@ const Blog = db.define(
       autoIncrement: true,
     },
     title: DataTypes.STRING,
-    image: DataTypes.STRING,
-    imageUrl: DataTypes.STRING,
     description: DataTypes.TEXT,
   },
   {
     freezeTableName: true,
   }
 );
+
+Blog.hasMany(BlogImage, {
+  foreignKey: "blog_id",
+});
 
 export default Blog;
 

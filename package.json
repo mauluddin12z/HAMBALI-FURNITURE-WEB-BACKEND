@@ -19,6 +19,7 @@
     "express-fileupload": "^1.4.0",
     "jsonwebtoken": "^9.0.1",
     "mysql2": "^3.3.5",
-    "sequelize": "^6.32.0"
+    "sequelize": "^6.32.0",
+    "uuid": "^9.0.0"
   }
 }
