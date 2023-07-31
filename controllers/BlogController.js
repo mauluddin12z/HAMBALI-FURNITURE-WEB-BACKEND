@@ -10,7 +10,9 @@ export const getBlogs = async (req, res) => {
   try {
     const response = await Blog.findAll({
       include: [
-        { model: BlogImage, attributes: ["image", "imageUrl", "blog_id"] },
+        {
+          model: BlogImage,
+        },
       ],
       order: [["createdAt", "DESC"]],
     });
@@ -44,9 +46,7 @@ export const getBlogImageById = async (req, res) => {
 export const getBlogById = async (req, res) => {
   try {
     const response = await Blog.findOne({
-      include: [
-        { model: BlogImage, attributes: ["image", "imageUrl", "blog_id"] },
-      ],
+      include: [{ model: BlogImage }],
       where: { blog_id: req.params.id },
     });
     res.json(response);
@@ -60,9 +60,7 @@ export const getFilteredBlogs = async (req, res) => {
   limit = limit ? parseInt(limit) : null;
   try {
     const response = await Blog.findAll({
-      include: [
-        { model: BlogImage, attributes: ["image", "imageUrl", "blog_id"] },
-      ],
+      include: [{ model: BlogImage }],
       order: [["createdAt", "DESC"]],
       offset: start,
       limit: limit,
@@ -79,9 +77,7 @@ export const getOtherBlogs = async (req, res) => {
   let { blogIdQuery } = req.query;
   try {
     const response = await Blog.findAll({
-      include: [
-        { model: BlogImage, attributes: ["image", "imageUrl", "blog_id"] },
-      ],
+      include: [{ model: BlogImage }],
       order: [["createdAt", "DESC"]],
       where: {
         blog_id: {
@@ -101,9 +97,7 @@ export const getBlogByTitle = async (req, res) => {
   let { blogTitleQuery } = req.query;
   try {
     const response = await Blog.findOne({
-      include: [
-        { model: BlogImage, attributes: ["image", "imageUrl", "blog_id"] },
-      ],
+      include: [{ model: BlogImage }],
       where: {
         title: blogTitleQuery,
       },
@@ -115,6 +109,7 @@ export const getBlogByTitle = async (req, res) => {
 };
 
 const pathToBlogImg = "./public/uploads/blogImg/";
+
 export const createBlog = async (req, res) => {
   let { title, description } = req.body;
   title = title?.replace(/[^a-zA-Z0-9 -]/g, "") || "";
@@ -124,58 +119,43 @@ export const createBlog = async (req, res) => {
     if (existingBlog) {
       return res.status(422).json({ msg: "Blog title already exists" });
     }
-
     const blog = await Blog.create({
       title,
       description,
     });
-
     const blogId = blog.blog_id;
-
     if (!req.files || !req.files.images) {
       return res.status(422).json({ msg: "No image files uploaded" });
     }
-
     const images = Array.isArray(req.files.images)
       ? req.files.images
       : [req.files.images];
     const allowedTypes = [".png", ".jpg", ".jpeg", ".jfif"];
     const maxFileSize = 50 * 1024 * 1024;
 
-    const uploadPromises = images.map((image) => {
-      return new Promise((resolve, reject) => {
-        const ext = path.extname(image.name);
-        const fileName = datetimenow() + "-" + uuidv4() + ext;
+    for (const image of images) {
+      const ext = path.extname(image.name);
+      const fileName = datetimenow() + "-" + uuidv4() + ext;
 
-        if (!allowedTypes.includes(ext.toLowerCase())) {
-          reject({ msg: "Invalid File" });
+      if (!allowedTypes.includes(ext.toLowerCase()))
+        return res.status(422).json({ msg: "Invalid File" });
+      if (image.data.length > maxFileSize)
+        return res.status(422).json({ msg: "Image must be less than 50 MB" });
+      image.mv(pathToBlogImg + fileName, async (err) => {
+        if (err) {
+          return res.status(500).json({ msg: err.message });
         }
-
-        if (image.data.length > maxFileSize) {
-          reject({ msg: "Image must be less than 50 MB" });
+        try {
+          await BlogImage.create({
+            image: fileName,
+            imageUrl: `/uploads/blogImg/${fileName}`,
+            blog_id: blogId,
+          });
+        } catch (error) {
+          console.log(error.message);
         }
-
-        image.mv(pathToBlogImg + fileName, async (err) => {
-          if (err) {
-            reject({ msg: err.message });
-          }
-
-          try {
-            await BlogImage.create({
-              image: fileName,
-              imageUrl: `/uploads/blogImg/${fileName}`,
-              blog_id: blogId,
-            });
-            resolve();
-          } catch (error) {
-            reject({ msg: error.message });
-          }
-        });
       });
-    });
-
-    await Promise.all(uploadPromises);
-
+    }
     res.status(201).json({ msg: "Data successfully created" });
   } catch (error) {
     console.log(error.message);
@@ -191,7 +171,8 @@ export const updateBlog = async (req, res) => {
   });
   if (!getBlogById) return res.status(404).json({ msg: "Data not found" });
 
-  const { title, description } = req.body;
+  let { title, description } = req.body;
+  title = title?.replace(/[^a-zA-Z0-9 -]/g, "") || "";
 
   const existingBlog = await Blog.findOne({
     where: {
@@ -205,7 +186,6 @@ export const updateBlog = async (req, res) => {
   if (existingBlog) {
     return res.status(422).json({ msg: "Blog title already exists" });
   }
-
   let fileName = "";
 
   if (req.files == null) {
@@ -213,14 +193,12 @@ export const updateBlog = async (req, res) => {
     try {
       await Blog.update(
         {
-          title: title?.replace(/[^a-zA-Z0-9 ]/g, "") || getBlogById.title,
+          title,
           description,
-          image: fileName,
-          imageUrl: `/uploads/blogImg/${fileName}`,
         },
         {
           where: {
-            category_id: req.params.id,
+            blog_id: req.params.id,
           },
         }
       );
@@ -229,65 +207,95 @@ export const updateBlog = async (req, res) => {
       console.log(error.message);
     }
   } else {
-    const image = req.files.image;
-    const fileSize = image.data.length;
-    const maxFileSize = 50 * 1024 * 1024;
-    const ext = path.extname(image.name);
-    fileName = datetimenow() + image.md5 + ext;
-    const allowedType = [".png", ".jpg", ".jpeg", ".jfif"];
+    try {
+      const getBlogImageById = await BlogImage.findAll({
+        where: {
+          blog_id: req.params.id,
+        },
+      });
+      await Blog.update(
+        {
+          title,
+          description,
+        },
+        {
+          where: {
+            blog_id: req.params.id,
+          },
+        }
+      );
 
-    if (!allowedType.includes(ext.toLowerCase()))
-      return res.status(422).json({ msg: "Invalid Images" });
-    if (fileSize > maxFileSize)
-      return res.status(422).json({ msg: "Image must be less than 50 MB" });
-    if (getBlogById.image) {
-      fs.unlinkSync(pathToBlogImg + getBlogById.image);
-    }
-    image.mv(pathToBlogImg + fileName, async (err) => {
-      if (err) {
-        return res.status(500).json({ msg: err.message });
+      if (!req.files || !req.files.images) {
+        return res.status(422).json({ msg: "No image files uploaded" });
       }
-      try {
-        await Blog.update(
-          {
-            title: title?.replace(/[^a-zA-Z0-9 ]/g, "") || getBlogById.title,
-            description,
+      const images = Array.isArray(req.files.images)
+        ? req.files.images
+        : [req.files.images];
+      const allowedTypes = [".png", ".jpg", ".jpeg", ".jfif"];
+      const maxFileSize = 50 * 1024 * 1024;
+
+      for (const image of images) {
+        const ext = path.extname(image.name);
+        const fileName = datetimenow() + "-" + uuidv4() + ext;
+
+        if (!allowedTypes.includes(ext.toLowerCase())) {
+          return res.status(422).json({ msg: "Invalid File" });
+        }
+
+        if (image.data.length > maxFileSize) {
+          return res.status(422).json({ msg: "Image must be less than 50 MB" });
+        }
+
+        image.mv(pathToBlogImg + fileName, async (err) => {
+          if (err) {
+            return res.status(500).json({ msg: err.message });
+          }
+
+          await BlogImage.create({
             image: fileName,
             imageUrl: `/uploads/blogImg/${fileName}`,
-          },
-          {
-            where: {
-              blog_id: req.params.id,
-            },
-          }
-        );
-        res.status(200).json({ msg: `Data Successfully updated` });
-      } catch (error) {
-        console.log(error.message);
+            blog_id: req.params.id,
+          });
+        });
       }
-    });
+      for (const blogImage of getBlogImageById) {
+        fs.unlinkSync(pathToBlogImg + blogImage.image);
+        await BlogImage.destroy({
+          where: {
+            blogImage_id: blogImage.blogImage_id,
+          },
+        });
+      }
+      res.status(200).json({ msg: `Data Successfully updated` });
+    } catch (error) {
+      console.log(error.message);
+      res.status(500).json({ msg: "Internal Server Error" });
+    }
   }
 };
 
-export const deleteCategory = async (req, res) => {
-  const getBlogById = await Category.findOne({
-    where: {
-      category_id: req.params.id,
-    },
-  });
-  if (!getBlogById) return res.status(404).json({ msg: "Data not found" });
+export const deleteBlog = async (req, res) => {
+  const blogId = req.params.id;
 
   try {
-    if (getCategoryById.image) {
-      fs.unlinkSync(pathToBlogImg + getCategoryById.image);
-    }
-    await Category.destroy({
-      where: {
-        category_id: req.params.id,
-      },
+    const getBlogById = await Blog.findOne({
+      include: [{ model: BlogImage }],
+      where: { blog_id: blogId },
     });
-    res.status(200).json({ msg: `Data successfully deleted` });
+    if (!getBlogById) {
+      return res.status(404).json({ msg: "Blog not found" });
+    }
+
+    await BlogImage.destroy({ where: { blog_id: blogId } });
+    await Blog.destroy({ where: { blog_id: blogId } });
+
+    for (const blogImage of getBlogById?.blog_images) {
+      fs.unlinkSync(pathToBlogImg + blogImage.image);
+    }
+
+    res.status(200).json({ msg: "Blog successfully deleted" });
   } catch (error) {
     console.log(error.message);
+    res.status(500).json({ msg: "Internal Server Error" });
   }
 };

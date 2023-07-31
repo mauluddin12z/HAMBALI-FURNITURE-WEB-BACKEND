@@ -1,6 +1,7 @@
 import express from "express";
 import {
   createBlog,
+  deleteBlog,
   getBlogById,
   getBlogByTitle,
   getBlogImageById,
@@ -22,5 +23,6 @@ router.get("/blogImages/:id", getBlogImageById);
 router.get("/blog/:id", getBlogById);
 router.post("/blog", createBlog);
 router.patch("/blog/:id", updateBlog);
+router.delete("/blog/:id", deleteBlog);
 
 export default router;
