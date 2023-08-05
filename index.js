@@ -7,6 +7,7 @@ import BlogRoute from "./routes/BlogRoute.js";
 import UserRoute from "./routes/UserRoute.js";
 import path from "path";
 import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
 dotenv.config();
 
 const app = express();
@@ -20,7 +21,7 @@ app.use(
     ],
   })
 );
-
+app.use(cookieParser());
 app.use(express.json());
 app.use(FileUpload());
 app.use(ProductRoute);
