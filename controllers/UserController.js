@@ -15,7 +15,12 @@ export const getUsers = async (req, res) => {
 
 export const register = async (req, res) => {
   const { name, username, password, confPassword } = req.body
-
+  const user = await Users.findOne({
+    where: {
+      username: req.body.username
+    }
+  })
+  if (user) return res.status(400).json({ msg: "Username sudah terdaftar" })
   if (password !== confPassword) return res.status(400).json({ msg: "Password dan Confirm password tidak cocok" })
   const salt = await bcrypt.genSalt();
   const hashPassword = await bcrypt.hash(password, salt)
@@ -58,14 +63,11 @@ export const login = async (req, res) => {
     })
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000,
-      sameSite: "none",
-      secure: true,
-      domain: "hambali-furniture-web-backend.vercel.app",
+      maxAge: 24 * 60 * 60 * 1000
     })
     res.json({ accessToken })
   } catch (error) {
-    res.status(404).json({ msg: "Username tidak ditemukan" })
+    console.log(error.message);
   }
 }
 
@@ -80,7 +82,7 @@ export const logout = async (req, res) => {
   if (!user[0]) return res.sendStatus(204)
   const userId = user[0].user_id
   await Users.update({
-    refreshToken: null
+    refresh_token: null
   }, {
     where: {
       user_id: userId
