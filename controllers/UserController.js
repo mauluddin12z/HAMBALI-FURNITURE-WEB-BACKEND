@@ -58,7 +58,10 @@ export const login = async (req, res) => {
     })
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000
+      maxAge: 24 * 60 * 60 * 1000,
+      sameSite: "none",
+      secure: true,
+      domain: "hambali-furniture-web-backend.vercel.app",
     })
     res.json({ accessToken })
   } catch (error) {
