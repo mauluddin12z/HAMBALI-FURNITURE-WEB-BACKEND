@@ -11,6 +11,8 @@ import {
   updateProduct,
 } from "../controllers/ProductController.js";
 
+import { verifyToken } from "../middleware/verifyToken.js";
+
 const router = express.Router();
 
 router.get("/products", getProducts);
@@ -18,9 +20,9 @@ router.get("/productByName", getProductByName);
 router.get("/productSearchResults", getProductSearchResults);
 router.get("/filteredProducts", getFilteredProducts);
 router.get("/relatedProducts", getRelatedProducts);
-router.get("/products/:id", getProductById);
-router.post("/products", createProduct);
-router.patch("/products/:id", updateProduct);
-router.delete("/products/:id", deleteProduct);
+router.get("/product/:id", getProductById);
+router.post("/products",verifyToken, createProduct);
+router.patch("/products/:id",verifyToken, updateProduct);
+router.delete("/products/:id",verifyToken, deleteProduct);
 
 export default router;

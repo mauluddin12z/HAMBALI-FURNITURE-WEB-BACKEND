@@ -5,18 +5,43 @@ import datetimenow from "../utils/datetimeFormatter.js";
 import { Op } from "sequelize";
 
 export const getCategories = async (req, res) => {
-  let { start, limit } = req.query;
+  try {
+    const response = await Category.findAll();
+    res.json(response);
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+export const getFilteredCategories = async (req, res) => {
+  let { start, limit, searchQuery } = req.query;
   start = start ? parseInt(start) : null;
   limit = limit ? parseInt(limit) : null;
+  const searchFilter = searchQuery
+    ? {
+      [Op.or]: [
+        {
+          category: {
+            [Op.like]: `%${searchQuery}%`,
+          },
+        },
+      ],
+    }
+    : {};
   try {
     const response = await Category.findAll({
       order: [["category", "ASC"]],
       offset: start,
       limit: limit,
+      where: {
+        ...searchFilter,
+      },
     });
     res.json(response);
   } catch (error) {
     console.log(error.message);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 export const getCategoryById = async (req, res) => {
@@ -27,6 +52,7 @@ export const getCategoryById = async (req, res) => {
     res.json(response);
   } catch (error) {
     console.log(error.message);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
@@ -35,12 +61,15 @@ export const getCategoryByName = async (req, res) => {
   try {
     const response = await Category.findOne({
       where: {
-        category: categoryQuery,
+        category: {
+          [Op.like]: `%${categoryQuery}%`,
+        },
       },
     });
     res.json(response);
   } catch (error) {
     console.log(error.message);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
@@ -52,6 +81,10 @@ export const createCategory = async (req, res) => {
 
   if (existingCategory) {
     return res.status(422).json({ msg: "Category name already exists" });
+  }
+
+  if (!req.files || !req.files.image) {
+    return res.status(400).json({ msg: "No image files uploaded" });
   }
 
   if (req.files !== null) {
@@ -80,6 +113,7 @@ export const createCategory = async (req, res) => {
         res.status(201).json({ msg: "Data successfully created" });
       } catch (error) {
         console.log(error.message);
+        res.status(500).json({ error: 'Internal Server Error' });
       }
     });
   }

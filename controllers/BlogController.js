@@ -55,15 +55,35 @@ export const getBlogById = async (req, res) => {
   }
 };
 export const getFilteredBlogs = async (req, res) => {
-  let { start, limit } = req.query;
+  let { start, limit, searchQuery } = req.query;
   start = start ? parseInt(start) : null;
   limit = limit ? parseInt(limit) : null;
+  const searchFilter = searchQuery
+    ? {
+      [Op.or]: [
+        {
+          description: {
+            [Op.like]: `%${searchQuery}%`,
+          },
+        },
+        {
+          title: {
+            [Op.like]: `%${searchQuery}%`,
+          },
+        },
+      ],
+    }
+    : {};
+
   try {
     const response = await Blog.findAll({
       include: [{ model: BlogImage }],
       order: [["createdAt", "DESC"]],
       offset: start,
       limit: limit,
+      where: {
+        ...searchFilter,
+      },
     });
 
     res.json(response);
@@ -119,17 +139,18 @@ export const createBlog = async (req, res) => {
     if (existingBlog) {
       return res.status(422).json({ msg: "Blog title already exists" });
     }
+    if (!req.files || !req.files.image) {
+      return res.status(422).json({ msg: "No image files uploaded" });
+    }
+
     const blog = await Blog.create({
       title,
       description,
     });
     const blogId = blog.blog_id;
-    if (!req.files || !req.files.images) {
-      return res.status(422).json({ msg: "No image files uploaded" });
-    }
-    const images = Array.isArray(req.files.images)
-      ? req.files.images
-      : [req.files.images];
+    const images = Array.isArray(req.files.image)
+      ? req.files.image
+      : [req.files.image];
     const allowedTypes = [".png", ".jpg", ".jpeg", ".jfif"];
     const maxFileSize = 50 * 1024 * 1024;
 
@@ -224,13 +245,9 @@ export const updateBlog = async (req, res) => {
           },
         }
       );
-
-      if (!req.files || !req.files.images) {
-        return res.status(422).json({ msg: "No image files uploaded" });
-      }
-      const images = Array.isArray(req.files.images)
-        ? req.files.images
-        : [req.files.images];
+      const images = Array.isArray(req.files.image)
+        ? req.files.image
+        : [req.files.image];
       const allowedTypes = [".png", ".jpg", ".jpeg", ".jfif"];
       const maxFileSize = 50 * 1024 * 1024;
 
@@ -250,7 +267,6 @@ export const updateBlog = async (req, res) => {
           if (err) {
             return res.status(500).json({ msg: err.message });
           }
-
           await BlogImage.create({
             image: fileName,
             imageUrl: `/uploads/blogImg/${fileName}`,
@@ -286,13 +302,13 @@ export const deleteBlog = async (req, res) => {
       return res.status(404).json({ msg: "Blog not found" });
     }
 
-    await BlogImage.destroy({ where: { blog_id: blogId } });
-    await Blog.destroy({ where: { blog_id: blogId } });
-
+    console.log(getBlogById?.blog_images)
     for (const blogImage of getBlogById?.blog_images) {
       fs.unlinkSync(pathToBlogImg + blogImage.image);
     }
 
+    await BlogImage.destroy({ where: { blog_id: blogId } });
+    await Blog.destroy({ where: { blog_id: blogId } });
     res.status(200).json({ msg: "Blog successfully deleted" });
   } catch (error) {
     console.log(error.message);

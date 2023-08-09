@@ -23,22 +23,22 @@ export const getFilteredProducts = async (req, res) => {
   start = start ? parseInt(start) : null;
   limit = limit ? parseInt(limit) : null;
   categoryQuery = categoryQuery ? parseInt(categoryQuery) : null;
-  const whereCondition = categoryQuery ? { category_id: categoryQuery } : {};
-  const searchValue = searchQuery
+  const categoryFilter = categoryQuery ? { category_id: categoryQuery } : {};
+  const searchFilter = searchQuery
     ? {
-        [Op.or]: [
-          {
-            product_name: {
-              [Op.like]: `%${searchQuery}%`,
-            },
+      [Op.or]: [
+        {
+          product_name: {
+            [Op.like]: `%${searchQuery}%`,
           },
-          {
-            "$category.category$": {
-              [Op.like]: `%${searchQuery}%`,
-            },
+        },
+        {
+          "$category.category$": {
+            [Op.like]: `%${searchQuery}%`,
           },
-        ],
-      }
+        },
+      ],
+    }
     : {};
 
   try {
@@ -48,8 +48,8 @@ export const getFilteredProducts = async (req, res) => {
       offset: start,
       limit: limit,
       where: {
-        ...whereCondition,
-        ...searchValue,
+        ...categoryFilter,
+        ...searchFilter,
       },
     });
 
@@ -61,25 +61,24 @@ export const getFilteredProducts = async (req, res) => {
 };
 
 export const getProductSearchResults = async (req, res) => {
-  let { start, limit, categoryQuery, searchQuery } = req.query;
+  let { start, limit, searchQuery } = req.query;
   start = start ? parseInt(start) : null;
   limit = limit ? parseInt(limit) : null;
-  categoryQuery = categoryQuery ? parseInt(categoryQuery) : null;
-  const searchValue = searchQuery
+  const searchFilter = searchQuery
     ? {
-        [Op.or]: [
-          {
-            product_name: {
-              [Op.like]: `%${searchQuery}%`,
-            },
+      [Op.or]: [
+        {
+          product_name: {
+            [Op.like]: `%${searchQuery}%`,
           },
-          {
-            "$category.category$": {
-              [Op.like]: `%${searchQuery}%`,
-            },
+        },
+        {
+          "$category.category$": {
+            [Op.like]: `%${searchQuery}%`,
           },
-        ],
-      }
+        },
+      ],
+    }
     : {};
 
   try {
@@ -89,7 +88,7 @@ export const getProductSearchResults = async (req, res) => {
       offset: start,
       limit: limit,
       where: {
-        ...searchValue,
+        ...searchFilter,
       },
     });
 
@@ -103,10 +102,10 @@ export const getProductSearchResults = async (req, res) => {
 export const getRelatedProducts = async (req, res) => {
   let { categoryQuery, productNameQuery } = req.query;
   categoryQuery = categoryQuery ? parseInt(categoryQuery) : null;
-  const whereCondition = categoryQuery ? { category_id: categoryQuery } : {};
+  const categoryFilter = categoryQuery ? { category_id: categoryQuery } : {};
 
   if (productNameQuery) {
-    whereCondition.product_name = {
+    categoryFilter.product_name = {
       [Op.not]: productNameQuery,
     };
   }
@@ -115,7 +114,7 @@ export const getRelatedProducts = async (req, res) => {
     const response = await Product.findAll({
       include: [{ model: Category, attributes: ["category"] }],
       order: Sequelize.literal("RAND()"),
-      where: whereCondition,
+      where: categoryFilter,
     });
 
     res.json(response);
@@ -173,6 +172,10 @@ export const createProduct = async (req, res) => {
   const existingProduct = await Product.findOne({ where: { product_name } });
   if (existingProduct) {
     return res.status(422).json({ msg: "Product name already exists" });
+  }
+
+  if (!req.files || !req.files.image) {
+    return res.status(400).json({ msg: "No image files uploaded" });
   }
 
   if (req.files !== null) {
