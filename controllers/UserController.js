@@ -208,9 +208,9 @@ export const login = async (req, res) => {
       }
     })
     res.cookie("refreshToken", refreshToken, {
-      sameSite : "none",
+      sameSite: "none",
       secure: true,
-      domain: "hambali-furniture-web-backend.vercel.app",
+      domain: "pink-frail-woodpecker.cyclic.app",
       httpOnly: true
     });
 
