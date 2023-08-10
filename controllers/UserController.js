@@ -18,6 +18,7 @@ export const getUserById = async (req, res) => {
   try {
     const response = await Users.findOne({
       where: { user_id: req.params.id },
+      attributes: ["user_id", "name", "username"],
     });
     res.json(response);
   } catch (error) {
@@ -211,7 +212,7 @@ export const login = async (req, res) => {
       sameSite: "none",
       secure: true,
       domain: "pink-frail-woodpecker.cyclic.app",
-      httpOnly: true
+      httpOnly: true,
     });
 
     res.json({ accessToken })
