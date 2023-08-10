@@ -163,6 +163,7 @@ export const updateCategory = async (req, res) => {
       res.status(200).json({ msg: `Data successfully updated` });
     } catch (error) {
       console.log(error.message);
+      res.status(500).json({ msg: 'Internal Server Error' });
     }
   } else {
     const image = req.files.image;
@@ -200,6 +201,7 @@ export const updateCategory = async (req, res) => {
         res.status(200).json({ msg: `Data Successfully updated` });
       } catch (error) {
         console.log(error.message);
+        res.status(500).json({ msg: 'Internal Server Error' });
       }
     });
   }
@@ -225,5 +227,6 @@ export const deleteCategory = async (req, res) => {
     res.status(200).json({ msg: `Data successfully deleted` });
   } catch (error) {
     console.log(error.message);
+    res.status(500).json({ msg: 'Internal Server Error' });
   }
 };

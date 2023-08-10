@@ -19,6 +19,7 @@ export const getBlogs = async (req, res) => {
     res.json(response);
   } catch (error) {
     console.log(error.message);
+    res.status(500).json({ msg: 'Internal Server Error' });
   }
 };
 export const getBlogImages = async (req, res) => {
@@ -29,6 +30,7 @@ export const getBlogImages = async (req, res) => {
     res.json(response);
   } catch (error) {
     console.log(error.message);
+    res.status(500).json({ msg: 'Internal Server Error' });
   }
 };
 
@@ -52,6 +54,7 @@ export const getBlogById = async (req, res) => {
     res.json(response);
   } catch (error) {
     console.log(error.message);
+    res.status(500).json({ msg: 'Internal Server Error' });
   }
 };
 export const getFilteredBlogs = async (req, res) => {
@@ -89,7 +92,7 @@ export const getFilteredBlogs = async (req, res) => {
     res.json(response);
   } catch (error) {
     console.log(error.message);
-    res.status(500).json({ message: "Error fetching Blogs" });
+    res.status(500).json({ msg: 'Internal Server Error' });
   }
 };
 
@@ -109,7 +112,7 @@ export const getOtherBlogs = async (req, res) => {
     res.json(response);
   } catch (error) {
     console.log(error.message);
-    res.status(500).json({ message: "Error fetching products" });
+    res.status(500).json({ msg: 'Internal Server Error' });
   }
 };
 
@@ -180,7 +183,7 @@ export const createBlog = async (req, res) => {
     res.status(201).json({ msg: "Data successfully created" });
   } catch (error) {
     console.log(error.message);
-    res.status(500).json({ msg: "Internal Server Error" });
+    res.status(500).json({ msg: 'Internal Server Error' });
   }
 };
 
@@ -225,7 +228,7 @@ export const updateBlog = async (req, res) => {
       );
       res.status(200).json({ msg: `Data successfully updated` });
     } catch (error) {
-      console.log(error.message);
+      res.status(500).json({ msg: 'Internal Server Error' });
     }
   } else {
     try {
@@ -285,7 +288,7 @@ export const updateBlog = async (req, res) => {
       res.status(200).json({ msg: `Data Successfully updated` });
     } catch (error) {
       console.log(error.message);
-      res.status(500).json({ msg: "Internal Server Error" });
+      res.status(500).json({ msg: 'Internal Server Error' });
     }
   }
 };
@@ -312,6 +315,6 @@ export const deleteBlog = async (req, res) => {
     res.status(200).json({ msg: "Blog successfully deleted" });
   } catch (error) {
     console.log(error.message);
-    res.status(500).json({ msg: "Internal Server Error" });
+    res.status(500).json({ msg: 'Internal Server Error' });
   }
 };

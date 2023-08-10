@@ -15,6 +15,7 @@ export const getProducts = async (req, res) => {
     res.json(response);
   } catch (error) {
     console.log(error.message);
+    res.status(500).json({ msg: 'Internal Server Error' });
   }
 };
 
@@ -56,7 +57,7 @@ export const getFilteredProducts = async (req, res) => {
     res.json(response);
   } catch (error) {
     console.log(error.message);
-    res.status(500).json({ message: "Error fetching products" });
+    res.status(500).json({ msg: 'Internal Server Error' });
   }
 };
 
@@ -95,7 +96,7 @@ export const getProductSearchResults = async (req, res) => {
     res.json(response);
   } catch (error) {
     console.log(error.message);
-    res.status(500).json({ message: "Error fetching products" });
+    res.status(500).json({ msg: 'Internal Server Error' });
   }
 };
 
@@ -120,7 +121,7 @@ export const getRelatedProducts = async (req, res) => {
     res.json(response);
   } catch (error) {
     console.log(error.message);
-    res.status(500).json({ message: "Error fetching products" });
+    res.status(500).json({ msg: 'Internal Server Error' });
   }
 };
 
@@ -152,6 +153,7 @@ export const getProductByName = async (req, res) => {
     res.json(response);
   } catch (error) {
     console.log(error.message);
+    res.status(500).json({ msg: 'Internal Server Error' });
   }
 };
 
@@ -210,6 +212,7 @@ export const createProduct = async (req, res) => {
         res.status(201).json({ msg: "Data successfully created" });
       } catch (error) {
         console.log(error.message);
+        res.status(500).json({ msg: 'Internal Server Error' });
       }
     });
   }
@@ -274,6 +277,7 @@ export const updateProduct = async (req, res) => {
       res.status(200).json({ msg: `Data successfully updated` });
     } catch (error) {
       console.log(error.message);
+      res.status(500).json({ msg: 'Internal Server Error' });
     }
   } else {
     const image = req.files.image;
@@ -316,6 +320,7 @@ export const updateProduct = async (req, res) => {
         res.status(200).json({ msg: `Data successfully updated` });
       } catch (error) {
         console.log(error.message);
+        res.status(500).json({ msg: 'Internal Server Error' });
       }
     });
   }
@@ -340,5 +345,6 @@ export const deleteProduct = async (req, res) => {
     res.status(200).json({ msg: `Data successfully deleted` });
   } catch (error) {
     console.log(error.message);
+    res.status(500).json({ msg: 'Internal Server Error' });
   }
 };
