@@ -16,8 +16,7 @@ app.use(
   cors({
     credentials: true,
     origin: [
-      "http://localhost:3000",
-      "https://hambali-furniture-web-frontend.vercel.app",
+      process.env.FRONTEND_URL,
     ],
   })
 );
