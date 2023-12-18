@@ -4,7 +4,9 @@ import mysql2 from "mysql2";
 dotenv.config();
 
 
-const db = new Sequelize(process.env.MYSQL_ADDON_URI, {
+const db = new Sequelize("hambali_furniture", "admin", "uzAfVMXg", {
+  host: "mysql-158232-0.cloudclusters.net",
+  port: 16800,
   timezone: "+07:00",
   dialect: "mysql",
   dialectModule: mysql2,
