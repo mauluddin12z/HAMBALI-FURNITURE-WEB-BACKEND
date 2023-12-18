@@ -210,10 +210,8 @@ export const updateBlog = async (req, res) => {
   if (existingBlog) {
     return res.status(422).json({ msg: "Blog title already exists" });
   }
-  let fileName = "";
 
   if (req.files == null) {
-    fileName = getBlogById.image;
     try {
       await Blog.update(
         {
