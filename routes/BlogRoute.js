@@ -22,7 +22,7 @@ router.get("/blogByTitle", getBlogByTitle);
 router.get("/filteredBlogs", getFilteredBlogs);
 router.get("/blogImages/:id", getBlogImageById);
 router.get("/blog/:id", getBlogById);
-router.post("/blog", verifyToken, createBlog);
+router.post("/blog", createBlog);
 router.patch("/blog/:id", verifyToken, updateBlog);
 router.delete("/blog/:id", verifyToken, deleteBlog);
 
