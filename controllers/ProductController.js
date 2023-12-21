@@ -335,13 +335,18 @@ export const deleteProduct = async (req, res) => {
   if (!getProductById) return res.status(404).json({ msg: "Data not found" });
   try {
     if (getProductById.image) {
-      fs.unlinkSync(pathToProductImage + getProductById.image);
+      const imagePath = pathToProductImage + getProductById.image;
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath);
+      }
     }
+
     await Product.destroy({
       where: {
         product_id: req.params.id,
       },
     });
+
     res.status(200).json({ msg: `Data successfully deleted` });
   } catch (error) {
     console.log(error.message);
