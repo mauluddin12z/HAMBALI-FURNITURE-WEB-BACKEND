@@ -4,7 +4,7 @@ import path from "path";
 import fs from "fs";
 import datetimenow from "../utils/datetimeFormatter.js";
 import { v4 as uuidv4 } from "uuid";
-import { Op, Sequelize } from "sequelize";
+import { Op } from "sequelize";
 
 export const getBlogs = async (req, res) => {
   try {
