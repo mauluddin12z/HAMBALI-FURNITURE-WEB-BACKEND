@@ -23,7 +23,3 @@ const Category = db.define(
 Product.belongsTo(Category, { foreignKey: "category_id" });
 
 export default Category;
-
-(async () => {
-  await db.sync();
-})();

@@ -26,6 +26,3 @@ Blog.hasMany(BlogImage, {
 
 export default Blog;
 
-(async () => {
-  await db.sync();
-})();
