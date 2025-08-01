@@ -15,9 +15,10 @@ const app = express();
 app.use(
   cors({
     credentials: true,
-    origin: "*"
+    origin: 'https://hambali-furniture-web-frontend.vercel.app'
   })
 );
+
 app.use(cookieParser());
 app.use(express.json());
 app.use(FileUpload());
