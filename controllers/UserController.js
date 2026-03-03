@@ -3,6 +3,11 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { Op } from "sequelize";
 
+const JWT_ACCESS_SECRET = process.env.JWT_ACCESS_SECRET;
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
+const isProduction = process.env.NODE_ENV === "production";
+
+
 export const getUsers = async (req, res) => {
   try {
     const response = await Users.findAll({
@@ -197,10 +202,10 @@ export const login = async (req, res) => {
     const userId = user[0].user_id
     const name = user[0].name
     const username = user[0].username
-    const accessToken = jwt.sign({ userId, name, username }, process.env.ACCESS_TOKEN_SECRET, {
+    const accessToken = jwt.sign({ userId, name, username }, JWT_ACCESS_SECRET, {
       expiresIn: '20s'
     })
-    const refreshToken = jwt.sign({ userId, name, username }, process.env.REFRESH_TOKEN_SECRET, {
+    const refreshToken = jwt.sign({ userId, name, username }, JWT_REFRESH_SECRET, {
       expiresIn: '1d'
     })
     await Users.update({ refresh_token: refreshToken }, {
@@ -209,10 +214,12 @@ export const login = async (req, res) => {
       }
     })
     res.cookie("refreshToken", refreshToken, {
-      sameSite: "none",
-      secure: true,
-      domain: "pink-frail-woodpecker.cyclic.app",
       httpOnly: true,
+      secure: isProduction,
+      maxAge: 60 * 60 * 24 * 30,
+      path: "/",
+      sameSite: isProduction ? "none" : "lax",
+      domain: isProduction ? process.env.COOKIE_DOMAIN : undefined,
     });
 
     res.json({ accessToken })

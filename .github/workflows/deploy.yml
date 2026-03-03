@@ -39,6 +39,6 @@ jobs:
               npm ci --omit=dev
 
               # Restart the app with PM2
-              pm2 reload hambali-furniture-backend || (echo "PM2 reload failed, starting app" && pm2 start ecosystem.config.js)
+              pm2 reload hambali-furniture-backend || (echo "PM2 reload failed, starting app" && pm2 start ecosystem.config.cjs)
               pm2 save
             '
