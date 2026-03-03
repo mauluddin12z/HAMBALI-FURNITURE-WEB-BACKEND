@@ -1,0 +1,44 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          script: |
+            bash -lc '
+              # Load NVM (Node Version Manager)
+              export NVM_DIR="$HOME/.nvm"
+              [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+              nvm use 24  # Use the Node version you need
+
+              # Install PM2 if not installed
+              npm install -g pm2
+
+              # Navigate to the app folder
+              cd /home/hidayatmauluddin/hambali-furniture/backend
+
+              # Sync repo
+              git fetch origin
+              git reset --hard origin/main
+              git clean -fd
+
+              # Install dependencies and build
+              npm ci --omit=dev
+
+              # Restart the app with PM2
+              pm2 reload hambali-furniture-backend || (echo "PM2 reload failed, starting app" && pm2 start ecosystem.config.js)
+              pm2 save
+            '
