@@ -22,7 +22,7 @@ jobs:
               # Load NVM (Node Version Manager)
               export NVM_DIR="$HOME/.nvm"
               [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-              nvm use 24  # Use the Node version you need
+              nvm use 20  # Use the Node version you need
 
               # Install PM2 if not installed
               npm install -g pm2
