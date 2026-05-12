@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
@@ -19,26 +19,48 @@ jobs:
           port: ${{ secrets.VPS_PORT }}
           script: |
             bash -lc '
-              # Load NVM (Node Version Manager)
-              export NVM_DIR="$HOME/.nvm"
-              [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-              nvm use 20  # Use the Node version you need
+              set -e
 
-              # Install PM2 if not installed
-              npm install -g pm2
+              APP_NAME="${{ github.event.repository.name }}"
+              APP_DIR="/var/www/apps/$APP_NAME"
 
-              # Navigate to the app folder
-              cd /home/hidayatmauluddin/hambali-furniture/backend
+              echo "Deploying $APP_NAME to $APP_DIR"
 
-              # Sync repo
+              mkdir -p /var/www/apps
+
+              # Clone if missing
+              if [ ! -d "$APP_DIR/.git" ]; then
+                git clone git@github.com:${{ github.repository }}.git "$APP_DIR"
+              fi
+
+              cd "$APP_DIR"
+
+              echo "Syncing repository..."
               git fetch origin
               git reset --hard origin/main
               git clean -fd
 
-              # Install dependencies and build
+              echo "Loading NVM..."
+              export NVM_DIR="$HOME/.nvm"
+              [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+              nvm use 20
+
+              echo "Installing dependencies..."
               npm ci --omit=dev
 
-              # Restart the app with PM2
-              pm2 reload hambali-furniture-backend || (echo "PM2 reload failed, starting app" && pm2 start ecosystem.config.cjs)
+              echo "Ensuring PM2 is installed..."
+              if ! command -v pm2 >/dev/null 2>&1; then
+                npm install -g pm2
+              fi
+
+              echo "Starting/Reloading app..."
+              if pm2 list | grep -q "$APP_NAME"; then
+                pm2 reload ecosystem.config.cjs --update-env
+              else
+                pm2 start ecosystem.config.cjs --name "$APP_NAME"
+              fi
+
               pm2 save
+
+              echo "Deployment completed"
             '
